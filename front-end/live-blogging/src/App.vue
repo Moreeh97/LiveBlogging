@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useAuthStore } from './store'
 import Navbar from './components/Navbar.vue'
 
@@ -19,6 +19,11 @@ export default {
   },
   setup() {
     const authStore = useAuthStore()
+    
+    onMounted(() => {
+      // التحقق من المصادقة عند تحميل التطبيق
+      authStore.checkAuth()
+    })
     
     return {
       isAuthenticated: computed(() => authStore.isAuthenticated)
@@ -38,6 +43,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f5f5f5;
   color: #333;
+  line-height: 1.6;
 }
 
 #app {
@@ -73,7 +79,10 @@ main.with-navbar {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
 }
 
 .btn-primary {
@@ -94,6 +103,27 @@ main.with-navbar {
   background-color: #c82333;
 }
 
+.btn-outline {
+  background: transparent;
+  border: 2px solid #007bff;
+  color: #007bff;
+}
+
+.btn-outline:hover {
+  background: #007bff;
+  color: white;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
 .form-group {
   margin-bottom: 15px;
 }
@@ -104,6 +134,7 @@ main.with-navbar {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  transition: border-color 0.3s ease;
 }
 
 .form-control:focus {
@@ -121,5 +152,23 @@ main.with-navbar {
 
 .mb-3 {
   margin-bottom: 1rem;
+}
+
+.alert {
+  padding: 12px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.alert-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 </style>
