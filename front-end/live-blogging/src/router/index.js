@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../store'
 
-
+// استيراد المكونات
 import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import Feed from '../pages/Feed.vue'
@@ -9,7 +8,10 @@ import Profile from '../pages/Profile.vue'
 import AdminPanel from '../pages/AdminPanel.vue'
 
 const routes = [
-  { path: '/', redirect: '/feed' },
+  { 
+    path: '/', 
+    redirect: '/feed' 
+  },
   { 
     path: '/login', 
     component: Login,
@@ -42,15 +44,19 @@ const router = createRouter({
   routes
 })
 
-// protact paths
+// حماية المسارات
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
+  const token = localStorage.getItem('token')
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
   
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+  const isAuthenticated = !!token
+  const isAdmin = user.role === 'admin'
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login')
-  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
+  } else if (to.meta.requiresGuest && isAuthenticated) {
     next('/feed')
-  } else if (to.meta.requiresAdmin && !authStore.isAdmin) {
+  } else if (to.meta.requiresAdmin && !isAdmin) {
     next('/feed')
   } else {
     next()

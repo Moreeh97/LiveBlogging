@@ -1,34 +1,15 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { createRouter, createWebHistory } from 'vue-router'
+import router from './router'
 import App from './App.vue'
 
-//  import components
-import Login from './pages/Login.vue'
-import Register from './pages/Register.vue'
-import Feed from './pages/Feed.vue'
-import Profile from './pages/Profile.vue'
-import AdminPanel from './pages/AdminPanel.vue'
-
-// create Router
-const routes = [
-  { path: '/', redirect: '/feed' },
-  { path: '/login', component: Login, meta: { requiresGuest: true } },
-  { path: '/register', component: Register, meta: { requiresGuest: true } },
-  { path: '/feed', component: Feed, meta: { requiresAuth: true } },
-  { path: '/profile', component: Profile, meta: { requiresAuth: true } },
-  { path: '/admin', component: AdminPanel, meta: { requiresAuth: true, requiresAdmin: true } }
-]
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
-
-
+// إنشاء التطبيق
 const app = createApp(App)
 const pinia = createPinia()
 
+// استخدام Plugins
 app.use(pinia)
 app.use(router)
+
+// تركيب التطبيق
 app.mount('#app')

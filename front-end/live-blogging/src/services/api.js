@@ -24,26 +24,27 @@ api.interceptors.request.use(
   }
 )
 
-// handling
+// التعامل مع الأخطاء
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
+      localStorage.removeItem('user')
       window.location.href = '/login'
     }
     return Promise.reject(error)
   }
 )
 
-// auth services
+// خدمات المصادقة
 export const authService = {
   register: (userData) => api.post('/auth/register', userData),
   login: (credentials) => api.post('/auth/login', credentials),
   getProfile: () => api.get('/auth/profile')
 }
 
-// blog services
+// خدمات التدوينات
 export const postService = {
   getPosts: () => api.get('/posts'),
   getPost: (id) => api.get(`/posts/${id}`),
@@ -52,14 +53,14 @@ export const postService = {
   likePost: (id) => api.post(`/posts/${id}/like`)
 }
 
-// comment services
+// خدمات التعليقات
 export const commentService = {
   getComments: (postId) => api.get(`/posts/${postId}/comments`),
   addComment: (postId, commentData) => api.post(`/posts/${postId}/comments`, commentData),
   deleteComment: (id) => api.delete(`/comments/${id}`)
 }
 
-// admin services
+// خدمات المشرفين
 export const adminService = {
   getUsers: () => api.get('/admin/users'),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
