@@ -96,120 +96,140 @@
 </template>
 
 <script>
-// import { ref, computed } from 'vue'
-// import { useAuthStore, usePostStore } from '../store'
-// import { postService, commentService } from '../services'
+import { ref, computed } from 'vue'
+import { useAuthStore, usePostStore } from '../store/index.js'
+import { postService, commentService } from '../services/api.js'
 
-// export default {
-//   name: 'PostCard',
-//   props: {
-//     post: {
-//       type: Object,
-//       required: true
-//     }
-//   },
-//   setup(props) {
-//     const authStore = useAuthStore()
-//     const postStore = usePostStore()
-//     const showComments = ref(false)
-//     const newComment = ref('')
+export default {
+  name: 'PostCard',
+  props: {
+    post: {
+      type: Object,
+      required: true
+    }
+  },
+  setup(props) {
+    const authStore = useAuthStore()
+    const postStore = usePostStore()
+    const showComments = ref(false)
+    const newComment = ref('')
+    const commentLoading = ref(false)
 
-//     const isLiked = computed(() => {
-//       return props.post.likes?.includes(authStore.user?._id)
-//     })
+    const isLiked = computed(() => {
+      return props.post.likes?.includes(authStore.user?._id)
+    })
 
-//     const canDelete = computed(() => {
-//       return authStore.isAdmin || props.post.author?._id === authStore.user?._id
-//     })
+    const canDelete = computed(() => {
+      return authStore.isAdmin || props.post.author?._id === authStore.user?._id
+    })
 
-//     const canDeleteComment = (comment) => {
-//       return authStore.isAdmin || comment.author?._id === authStore.user?._id
-//     }
+    const canDeleteComment = (comment) => {
+      return authStore.isAdmin || comment.author?._id === authStore.user?._id
+    }
 
-//     const formatTime = (timestamp) => {
-//       return new Date(timestamp).toLocaleString('ar-EG')
-//     }
+    const formatTime = (timestamp) => {
+      if (!timestamp) return ''
+      return new Date(timestamp).toLocaleString('ar-EG')
+    }
 
-//     const toggleLike = async () => {
-//       try {
-//         await postService.likePost(props.post._id)
-//         postStore.toggleLike(props.post._id, authStore.user._id)
-//       } catch (error) {
-//         console.error('Error toggling like:', error)
-//       }
-//     }
+    const toggleLike = async () => {
+      try {
+        await postService.likePost(props.post._id)
+        postStore.toggleLike(props.post._id, authStore.user._id)
+      } catch (error) {
+        console.error('Error toggling like:', error)
+        alert('❌ حدث خطأ أثناء التفاعل مع التدوينة')
+      }
+    }
 
-//     const toggleComments = () => {
-//       showComments.value = !showComments.value
-//     }
+    const toggleComments = () => {
+      showComments.value = !showComments.value
+    }
 
-//     const addComment = async () => {
-//       if (!newComment.value.trim()) return
+    const addComment = async () => {
+      if (!newComment.value.trim()) return
 
-//       try {
-//         const response = await commentService.addComment(props.post._id, {
-//           content: newComment.value.trim()
-//         })
+      commentLoading.value = true
+      
+      try {
+        console.log('Adding comment to post:', props.post._id)
+        console.log('Comment content:', newComment.value.trim())
         
-//         postStore.addComment(props.post._id, response.data)
-//         newComment.value = ''
-//       } catch (error) {
-//         console.error('Error adding comment:', error)
-//         alert('❌ حدث خطأ أثناء إضافة التعليق')
-//       }
-//     }
+        const response = await commentService.addComment(props.post._id, {
+          content: newComment.value.trim()
+        })
+        
+        console.log('Comment added successfully:', response.data)
+        
+        postStore.addComment(props.post._id, response.data.comment)
+        newComment.value = ''
+        
+      } catch (error) {
+        console.error('Error adding comment:', error)
+        console.error('Error response:', error.response)
+        
+        if (error.response?.data?.message) {
+          alert(`❌ ${error.response.data.message}`)
+        } else {
+          alert('❌ حدث خطأ أثناء إضافة التعليق')
+        }
+      } finally {
+        commentLoading.value = false
+      }
+    }
 
-//     const deletePost = async () => {
-//       if (!confirm('هل أنت متأكد من حذف هذه التدوينة؟')) return
+    const deletePost = async () => {
+      if (!confirm('هل أنت متأكد من حذف هذه التدوينة؟')) return
 
-//       try {
-//         await postService.deletePost(props.post._id)
-//         postStore.removePost(props.post._id)
-//         alert('✅ تم حذف التدوينة بنجاح')
-//       } catch (error) {
-//         console.error('Error deleting post:', error)
-//         alert('❌ حدث خطأ أثناء حذف التدوينة')
-//       }
-//     }
+      try {
+        await postService.deletePost(props.post._id)
+        postStore.removePost(props.post._id)
+        alert('✅ تم حذف التدوينة بنجاح')
+      } catch (error) {
+        console.error('Error deleting post:', error)
+        alert('❌ حدث خطأ أثناء حذف التدوينة')
+      }
+    }
 
-//     const deleteComment = async (commentId) => {
-//       if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return
+    const deleteComment = async (commentId) => {
+      if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return
 
-//       try {
-//         await commentService.deleteComment(commentId)
-//         // إزالة التعليق من القائمة المحلية
-//         const post = postStore.posts.find(p => p._id === props.post._id)
-//         if (post && post.comments) {
-//           post.comments = post.comments.filter(c => c._id !== commentId)
-//         }
-//       } catch (error) {
-//         console.error('Error deleting comment:', error)
-//         alert('❌ حدث خطأ أثناء حذف التعليق')
-//       }
-//     }
+      try {
+        await commentService.deleteComment(commentId)
+        // إزالة التعليق من القائمة المحلية
+        const post = postStore.posts.find(p => p._id === props.post._id)
+        if (post && post.comments) {
+          post.comments = post.comments.filter(c => c._id !== commentId)
+        }
+      } catch (error) {
+        console.error('Error deleting comment:', error)
+        alert('❌ حدث خطأ أثناء حذف التعليق')
+      }
+    }
 
-//     const openImage = () => {
-//       if (props.post.image) {
-//         window.open(props.post.image, '_blank')
-//       }
-//     }
+    const openImage = () => {
+      if (props.post.image) {
+        window.open(props.post.image, '_blank')
+      }
+    }
 
-//     return {
-//       showComments,
-//       newComment,
-//       isLiked,
-//       canDelete,
-//       canDeleteComment,
-//       formatTime,
-//       toggleLike,
-//       toggleComments,
-//       addComment,
-//       deletePost,
-//       deleteComment,
-//       openImage
-//     }
-//   }
-// }
+    return {
+      showComments,
+      newComment,
+      commentLoading,
+      isLiked,
+      canDelete,
+      canDeleteComment,
+      formatTime,
+      toggleLike,
+      toggleComments,
+      addComment,
+      deletePost,
+      deleteComment,
+      openImage
+    }
+  }
+}
 </script>
 
 <style scoped>

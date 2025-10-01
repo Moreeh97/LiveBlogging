@@ -41,12 +41,13 @@
 </template>
 
 <script>
-// import { ref, onMounted, onUnmounted } from 'vue'
-// import { usePostStore, useAuthStore } from '../store'
-// import { postService, socketService } from '../services'
-// import CreatePost from '../components/CreatePost.vue'
-// import PostCard from '../components/PostCard.vue'
-// import LoadingSpinner from '../components/LoadingSpinner.vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { usePostStore, useAuthStore } from '../store/index.js'
+import { postService } from '../services/api.js'
+import socketService from '../services/socket.js'
+import CreatePost from '../components/CreatePost.vue'
+import PostCard from '../components/PostCard.vue'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 export default {
   name: 'FeedPage',
@@ -66,7 +67,7 @@ export default {
       loading.value = true
       try {
         const response = await postService.getPosts()
-        postStore.setPosts(response.data)
+        postStore.setPosts(response.data.posts || [])
       } catch (error) {
         console.error('Error loading posts:', error)
         alert('❌ حدث خطأ أثناء تحميل التدوينات')

@@ -2,7 +2,7 @@
   <div class="create-post card">
     <h3>✏️ اكتب تدوينة جديدة</h3>
     
-    <form @submit.prevent="submitPost">
+    <form @submit.prevent="submitPost" enctype="multipart/form-data">
       <div class="form-group">
         <textarea
           v-model="postContent"
@@ -27,6 +27,7 @@
           📸 إضافة صورة
         </button>
         <span v-if="selectedFile" class="file-name">{{ selectedFile.name }}</span>
+        <span v-if="uploadError" class="error-text">{{ uploadError }}</span>
       </div>
 
       <div class="form-actions">
@@ -45,8 +46,8 @@
 
 <script>
 import { ref } from 'vue'
-import { usePostStore } from '../store'
-import { postService } from '../services'
+import { usePostStore } from '../store/index.js'
+import { postService } from '../services/api.js'
 
 export default {
   name: 'CreatePost',
@@ -56,6 +57,7 @@ export default {
     const selectedFile = ref(null)
     const fileInput = ref(null)
     const loading = ref(false)
+    const uploadError = ref('')
     const maxLength = 1000
 
     const triggerFileInput = () => {
@@ -64,12 +66,25 @@ export default {
 
     const handleFileSelect = (event) => {
       const file = event.target.files[0]
+      uploadError.value = ''
+      
       if (file) {
-        // التحقق من حجم الملف (5MB كحد أقصى)
-        if (file.size > 5 * 1024 * 1024) {
-          alert('حجم الصورة يجب أن يكون أقل من 5MB')
+        // التحقق من نوع الملف
+        if (!file.type.startsWith('image/')) {
+          uploadError.value = 'يسمح برفع الصور فقط'
+          selectedFile.value = null
+          fileInput.value.value = ''
           return
         }
+
+        // التحقق من حجم الملف (5MB كحد أقصى)
+        if (file.size > 5 * 1024 * 1024) {
+          uploadError.value = 'حجم الصورة يجب أن يكون أقل من 5MB'
+          selectedFile.value = null
+          fileInput.value.value = ''
+          return
+        }
+        
         selectedFile.value = file
       }
     }
@@ -78,16 +93,21 @@ export default {
       if (!postContent.value.trim()) return
 
       loading.value = true
+      uploadError.value = ''
       
       try {
         const formData = new FormData()
         formData.append('content', postContent.value.trim())
+        
         if (selectedFile.value) {
           formData.append('image', selectedFile.value)
         }
 
+        console.log('Sending post data...')
         const response = await postService.createPost(formData)
-        postStore.addPost(response.data)
+        console.log('Post created successfully:', response.data)
+        
+        postStore.addPost(response.data.post)
         
         // إعادة تعيين النموذج
         postContent.value = ''
@@ -100,7 +120,14 @@ export default {
         alert('✅ تم نشر التدوينة بنجاح!')
       } catch (error) {
         console.error('Error creating post:', error)
-        alert('❌ حدث خطأ أثناء نشر التدوينة')
+        
+        if (error.response?.data?.message) {
+          uploadError.value = error.response.data.message
+        } else {
+          uploadError.value = '❌ حدث خطأ أثناء نشر التدوينة'
+        }
+        
+        alert(uploadError.value)
       } finally {
         loading.value = false
       }
@@ -111,6 +138,7 @@ export default {
       selectedFile,
       fileInput,
       loading,
+      uploadError,
       maxLength,
       triggerFileInput,
       handleFileSelect,
@@ -151,6 +179,7 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
+  margin-right: 10px;
 }
 
 .btn-outline:hover {
@@ -159,14 +188,21 @@ export default {
 }
 
 .file-name {
-  margin-right: 10px;
   color: #666;
   font-size: 0.9rem;
+}
+
+.error-text {
+  color: #dc3545;
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 5px;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
+  margin-top: 20px;
 }
 
 .btn:disabled {

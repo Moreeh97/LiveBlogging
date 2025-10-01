@@ -134,122 +134,122 @@
 </template>
 
 <script>
-// import { ref, reactive, onMounted } from 'vue'
-// import { usePostStore } from '../store'
-// import { adminService } from '../services'
-// import LoadingSpinner from '../components/LoadingSpinner.vue'
+import { ref, reactive, onMounted } from 'vue'
+import { usePostStore } from '../store/index.js'
+import { adminService } from '../services/api.js'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
 
-// export default {
-//   name: 'AdminPanel',
-//   components: {
-//     LoadingSpinner
-//   },
-//   setup() {
-//     const postStore = usePostStore()
+export default {
+  name: 'AdminPanel',
+  components: {
+    LoadingSpinner
+  },
+  setup() {
+    const postStore = usePostStore()
     
-//     const loadingUsers = ref(false)
-//     const users = ref([])
+    const loadingUsers = ref(false)
+    const users = ref([])
     
-//     const stats = reactive({
-//       totalUsers: 0,
-//       totalPosts: 0,
-//       totalComments: 0,
-//       totalLikes: 0
-//     })
+    const stats = reactive({
+      totalUsers: 0,
+      totalPosts: 0,
+      totalComments: 0,
+      totalLikes: 0
+    })
 
-//     const recentPosts = postStore.posts.slice(0, 10) // آخر 10 تدوينات
+    const recentPosts = postStore.posts.slice(0, 10) // آخر 10 تدوينات
 
-//     const loadUsers = async () => {
-//       loadingUsers.value = true
-//       try {
-//         // سيتم تفعيل هذه الخدمة لاحقاً
-//         // const response = await adminService.getUsers()
-//         // users.value = response.data
+    const loadUsers = async () => {
+      loadingUsers.value = true
+      try {
+        // سيتم تفعيل هذه الخدمة لاحقاً
+        // const response = await adminService.getUsers()
+        // users.value = response.data
         
-//         // بيانات تجريبية
-//         users.value = [
-//           {
-//             _id: '1',
-//             username: 'admin',
-//             email: 'admin@example.com',
-//             role: 'admin'
-//           },
-//           {
-//             _id: '2',
-//             username: 'user1',
-//             email: 'user1@example.com',
-//             role: 'user'
-//           }
-//         ]
+        // بيانات تجريبية
+        users.value = [
+          {
+            _id: '1',
+            username: 'admin',
+            email: 'admin@example.com',
+            role: 'admin'
+          },
+          {
+            _id: '2',
+            username: 'user1',
+            email: 'user1@example.com',
+            role: 'user'
+          }
+        ]
         
-//         stats.totalUsers = users.value.length
-//         stats.totalPosts = postStore.posts.length
-//         stats.totalComments = postStore.posts.reduce((total, post) => {
-//           return total + (post.comments?.length || 0)
-//         }, 0)
-//         stats.totalLikes = postStore.posts.reduce((total, post) => {
-//           return total + (post.likes?.length || 0)
-//         }, 0)
+        stats.totalUsers = users.value.length
+        stats.totalPosts = postStore.posts.length
+        stats.totalComments = postStore.posts.reduce((total, post) => {
+          return total + (post.comments?.length || 0)
+        }, 0)
+        stats.totalLikes = postStore.posts.reduce((total, post) => {
+          return total + (post.likes?.length || 0)
+        }, 0)
         
-//       } catch (error) {
-//         console.error('Error loading users:', error)
-//         alert('❌ حدث خطأ أثناء تحميل بيانات المستخدمين')
-//       } finally {
-//         loadingUsers.value = false
-//       }
-//     }
+      } catch (error) {
+        console.error('Error loading users:', error)
+        alert('❌ حدث خطأ أثناء تحميل بيانات المستخدمين')
+      } finally {
+        loadingUsers.value = false
+      }
+    }
 
-//     const deleteUser = async (userId) => {
-//       if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.')) {
-//         return
-//       }
+    const deleteUser = async (userId) => {
+      if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.')) {
+        return
+      }
 
-//       try {
-//         // await adminService.deleteUser(userId)
-//         users.value = users.value.filter(user => user._id !== userId)
-//         stats.totalUsers--
-//         alert('✅ تم حذف المستخدم بنجاح')
-//       } catch (error) {
-//         console.error('Error deleting user:', error)
-//         alert('❌ حدث خطأ أثناء حذف المستخدم')
-//       }
-//     }
+      try {
+        // await adminService.deleteUser(userId)
+        users.value = users.value.filter(user => user._id !== userId)
+        stats.totalUsers--
+        alert('✅ تم حذف المستخدم بنجاح')
+      } catch (error) {
+        console.error('Error deleting user:', error)
+        alert('❌ حدث خطأ أثناء حذف المستخدم')
+      }
+    }
 
-//     const deletePost = async (postId) => {
-//       if (!confirm('هل أنت متأكد من حذف هذه التدوينة؟')) {
-//         return
-//       }
+    const deletePost = async (postId) => {
+      if (!confirm('هل أنت متأكد من حذف هذه التدوينة؟')) {
+        return
+      }
 
-//       try {
-//         // await adminService.deletePost(postId)
-//         postStore.removePost(postId)
-//         stats.totalPosts--
-//         alert('✅ تم حذف التدوينة بنجاح')
-//       } catch (error) {
-//         console.error('Error deleting post:', error)
-//         alert('❌ حدث خطأ أثناء حذف التدوينة')
-//       }
-//     }
+      try {
+        // await adminService.deletePost(postId)
+        postStore.removePost(postId)
+        stats.totalPosts--
+        alert('✅ تم حذف التدوينة بنجاح')
+      } catch (error) {
+        console.error('Error deleting post:', error)
+        alert('❌ حدث خطأ أثناء حذف التدوينة')
+      }
+    }
 
-//     const formatTime = (timestamp) => {
-//       return new Date(timestamp).toLocaleString('ar-EG')
-//     }
+    const formatTime = (timestamp) => {
+      return new Date(timestamp).toLocaleString('ar-EG')
+    }
 
-//     onMounted(() => {
-//       loadUsers()
-//     })
+    onMounted(() => {
+      loadUsers()
+    })
 
-//     return {
-//       loadingUsers,
-//       users,
-//       stats,
-//       recentPosts,
-//       deleteUser,
-//       deletePost,
-//       formatTime
-//     }
-//   }
-// }
+    return {
+      loadingUsers,
+      users,
+      stats,
+      recentPosts,
+      deleteUser,
+      deletePost,
+      formatTime
+    }
+  }
+}
 </script>
 
 <style scoped>

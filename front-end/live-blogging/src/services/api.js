@@ -48,7 +48,11 @@ export const authService = {
 export const postService = {
   getPosts: () => api.get('/posts'),
   getPost: (id) => api.get(`/posts/${id}`),
-  createPost: (postData) => api.post('/posts', postData),
+  createPost: (postData) => api.post('/posts', postData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }),
   deletePost: (id) => api.delete(`/posts/${id}`),
   likePost: (id) => api.post(`/posts/${id}/like`)
 }
@@ -56,7 +60,11 @@ export const postService = {
 // خدمات التعليقات
 export const commentService = {
   getComments: (postId) => api.get(`/posts/${postId}/comments`),
-  addComment: (postId, commentData) => api.post(`/posts/${postId}/comments`, commentData),
+  addComment: (postId, commentData) => {
+    console.log('Sending comment to:', `/posts/${postId}/comments`);
+    console.log('Comment data:', commentData);
+    return api.post(`/posts/${postId}/comments`, commentData);
+  },
   deleteComment: (id) => api.delete(`/comments/${id}`)
 }
 
