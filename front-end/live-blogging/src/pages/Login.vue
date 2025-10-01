@@ -70,10 +70,10 @@
 </template>
 
 <script>
-// import { ref, reactive } from 'vue'
-// import { useRouter } from 'vue-router'
-// import { useAuthStore } from '../store'
-// import { authService } from '../services'
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../store/index.js'
+import { authService } from '../services/api.js'
 
 export default {
   name: 'LoginPage',
